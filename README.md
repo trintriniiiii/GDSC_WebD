@@ -19,10 +19,6 @@ Habit Tracker is a responsive, frontend-only web application that helps you buil
   The app uses the Notification API to send reminders.  
   **Note:** Notifications work only while the site is open.
 
-## Project Structure
-
-Habit Tracker/ ├── index.html # Main HTML file ├── style.css # CSS styling and animations ├── script.js # JavaScript for functionality, streak tracking, filtering, and notifications ├── content/ │ ├── icon.png # Favicon and header icon (if used) │ ├── streak.png # Fire image used in the streak display and notifications │ ├── motivation.png # Motivational illustration when the streak is zero │ └── EmptyIllustration.svg # Illustration shown when there are no habits └── README.md # This file
-
 ## Getting Started
 
 ### Prerequisites
