@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://kit.fontawesome.com/8c2e0b2377.js" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sinon.js/15.0.0/sinon.min.js"></script>
+  <title>Habit Tracker</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container-habit">
+    <div class="options">
+      <button id="showAllBtn" class="Filter"><i class="fas fa-bars"></i></button>
+      <button id="showhealthBtn" class="Filter" class="health"><i class="fa-solid fa-dumbbell"></i></button>
+      <button id="showproductiveBtn" class="Filter" class="productive"><i class="fa-solid fa-chart-line"></i></button>
+      <button id="showleisureBtn" class="Filter" class="leisure"><i class="fa-solid fa-gamepad"></i></button>
+      <button id="showsocialBtn" class="Filter" class="social"><i class="	fa-solid fa-comments"></i></button>
+      <button id="edit" class="Filter"><i class="fas fa-pen"></i></button>
+    </div>
+    <h1>Habit Tracker</h1>
+    <div class="habit-list">
+      <ul id="habitList">
+        <!-- Habit items will be dynamically added here -->
+      </ul>
+    </div>
+    <div class="no-habits-illustration">
+      <img src="./content/EmptyIllustration.svg" alt="No Habits">
+      <p id="no-habits-text">You have no habits. Click on the + button to add a new habit.</p>
+    </div>
+    <button id="addHabitBtn"><i class="fas fa-plus"></i></button>
+  </div>
+  <div class="container-streak">
+    <span class="all"><div class="streak" data-type="all"></div></span>
+    <span class="types">
+      <div id="streak-display"></div>
+     <div id="summary-display"></div>
+     <div id="best-streak-display"></div>
+    </span>
+  </div>
+   <!-- Modal for Adding Habit -->
+   <div id="habitModal" class="modal">
+    <div class="modal-content">
+      <h2>Add Habit</h2>
+      <label for="habitName">Habit Name:</label>
+      <input type="text" id="habitName" placeholder="Enter habit name">
+      
+      <label for="habitType">Task Type:</label>
+      <select id="habitType">
+        <option value="health">Health<i class="fa-solid fa-dumbbell"></i> </option>
+        <option value="productive">Productive<i class="fa-solid fa-chart-line"></i> </option>
+        <option value="leisure">Leisure<i class="fa-solid fa-gamepad"></i> </option>
+        <option value="social">Social<i class="	fa-solid fa-comments"></i> </option>
+      </select>
+      
+      <textarea id="habitAbout" placeholder="Additional details about the habit..."></textarea>
+      <button id="saveHabitBtn">Save Habit</button>
+      <button id="closeModalBtn">Close</button>
+    </div>
+  </div>
+
+
+  <script src="script.js"></script>
+</body>
+</html>
