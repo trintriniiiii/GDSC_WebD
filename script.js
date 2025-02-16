@@ -310,7 +310,7 @@ function scheduleEndOfDayNotification() {
   const timeUntilNotification = midnight - now;
 
   if (timeUntilNotification > 0) {
-    setTimeout(showInPageNotification, testDelay);
+    setTimeout(showInPageNotification, timeUntilNotification);
   }
 }
 function showInPageNotification() {
