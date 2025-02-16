@@ -1,4 +1,3 @@
-// Get references to the DOM elements
 const addHabitBtn = document.getElementById('addHabitBtn');
 const habitModal = document.getElementById('habitModal');
 const saveHabitBtn = document.getElementById('saveHabitBtn');
@@ -9,7 +8,6 @@ const habitList = document.getElementById('habitList');
 const bodyWrapper = document.querySelector('.body-wrapper');
 const noHabitsIllustration = document.querySelector('.no-habits-illustration');
 const streakDisplay = document.getElementById('streak-display');
-const summaryDisplay = document.getElementById('summary-display');
 const bestStreakDisplay = document.getElementById('best-streak-display');
 const habitAboutInput = document.getElementById('habitAbout');
 let habits = JSON.parse(localStorage.getItem('habits')) || [];
@@ -18,7 +16,7 @@ let startDate = localStorage.getItem('startDate') || '';
 let lastResetDate = localStorage.getItem('resetDate') || new Date().toDateString();
 let editMode = false;
 let bestStreak = JSON.parse(localStorage.getItem('bestStreak')) || 0;
-
+let activeFilter = 'all'; 
 function toggleEditMode() {
   editMode = !editMode;
   habitList.classList.toggle('edit-mode', editMode);
@@ -34,7 +32,6 @@ const taskIcons = {
 
 initializeApp();
 
-// Function to initialize the app
 function initializeApp() {
   checkDailyReset();
   renderHabits();
@@ -42,33 +39,30 @@ function initializeApp() {
   updateLocalStorage();
 }
 
-// Open modal
 addHabitBtn.addEventListener('click', () => {
   habitModal.style.display = 'flex';
   bodyWrapper.classList.add('modal-active');
 });
 
-// Close modal
 closeModalBtn.addEventListener('click', closeModal);
 
-// Save habit
 saveHabitBtn.addEventListener('click', () => {
   const habitName = habitNameInput.value.trim();
   const habitType = habitTypeSelect.value;
-  const habitAbout = habitAboutInput.value.trim(); // get the about info
+  const habitAbout = habitAboutInput.value.trim(); 
 
   if (habitName && habitType) {
     const newHabit = {
       name: habitName,
       type: habitType,
       completed: false,
-      about: habitAbout // store the about info
+      about: habitAbout 
     };
     habits.push(newHabit);
     updateLocalStorage();
     renderHabits();
     toggleNoHabitsIllustration();
-    // Clear fields after saving
+
     habitNameInput.value = '';
     habitAboutInput.value = '';
     closeModal();
@@ -77,33 +71,35 @@ saveHabitBtn.addEventListener('click', () => {
   }
 });
 
-// Render habits list
 function renderHabits() {
   habitList.innerHTML = '';
   habits.forEach((habit, index) => {
+
+    if (activeFilter !== 'all' && habit.type !== activeFilter) {
+      return; 
+    }
+
     const li = document.createElement('li');
-    li.classList.add(habit.type);
-    li.classList.add('habit-item');
+    li.classList.add(habit.type, 'habit-item');
     if (habit.completed) li.classList.add('completed');
     li.innerHTML = `
-     <div class="habit-item-wrapper">
-    <span class="habit-icon">${taskIcons[habit.type] || ''}</span>
-    <label class="habit-label"> 
-       
-      <input type="checkbox" class="habit-checkbox" data-index="${index}" ${habit.completed ? 'checked' : ''}>
-      <div class="habit-content">
-        <span>${habit.name}</span>
+      <div class="habit-item-wrapper">
+        <span class="habit-icon">${taskIcons[habit.type] || ''}</span>
+        <label class="habit-label">
+          <input type="checkbox" class="habit-checkbox" data-index="${index}" ${habit.completed ? 'checked' : ''}>
+          <div class="habit-content">
+            <span>${habit.name}</span>
+          </div>
+        </label>
+        <button class="eye-btn" data-index="${index}" title="View Details">
+          <i class="fa-solid fa-eye"></i>
+        </button>
       </div>
-    </label>
-    <button class="eye-btn" data-index="${index}" title="View Details">
-      <i class="fa-solid fa-eye"></i>
-    </button>
-    </div>
-  `;
+    `;
 
-  // Attach event listener to the eye button to toggle about section
-  const eyeBtn = li.querySelector('.eye-btn');
-  eyeBtn.addEventListener('click', () => toggleAboutSection(li, habit));
+    const eyeBtn = li.querySelector('.eye-btn');
+    eyeBtn.addEventListener('click', () => toggleAboutSection(li, habit));
+
     if (editMode) {
       const deleteBtn = document.createElement('button');
       deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
@@ -113,18 +109,90 @@ function renderHabits() {
     }
     habitList.appendChild(li);
   });
-  
+
   document.querySelectorAll('.habit-checkbox').forEach(checkbox => {
     checkbox.addEventListener('change', toggleHabitCompletion);
   });
+  const bestStreakElement = document.getElementById('best-streak-number');
+  bestStreakElement.textContent = bestStreak;
+  const streakOverlay = document.getElementById('streak-number-overlay');
 
-  streakDisplay.textContent = `Streak: ${habitStreak} days`;
-  summaryDisplay.textContent = startDate ? `Start Date: ${startDate}`: '';
-  bestStreakDisplay.textContent = `Best Streak: ${bestStreak} days`;
+  streakOverlay.textContent = habitStreak;
 }
 
+document.querySelectorAll('.Filter').forEach(button => {
+  button.addEventListener('click', function() {
+    if(this.getAttribute('data-type')) {
+    activeFilter = this.getAttribute('data-type');
+    renderHabits();
+    }
+  });
+});
 
-// Toggle habit completion
+function animateStreakUpdate() {
+  const fireImg = document.getElementById('fire-img');
+  const streakOverlay = document.getElementById('streak-number-overlay');
+
+  streakOverlay.textContent = habitStreak;
+
+  fireImg.classList.remove('fire-animate');
+  void fireImg.offsetWidth; 
+  fireImg.classList.add('fire-animate');
+
+}
+
+function showConfetti() {
+
+  let confettiContainer = document.getElementById('confetti-container');
+  if (!confettiContainer) {
+    confettiContainer = document.createElement('div');
+    confettiContainer.id = 'confetti-container';
+    document.getElementById('streak-container').appendChild(confettiContainer);
+  }
+
+  for (let i = 0; i < 50; i++) {
+    const confetti = document.createElement('div');
+    confetti.className = 'confetti';
+    confetti.style.left = Math.random() * 100 + '%';
+    confetti.style.backgroundColor = randomColor();
+    confettiContainer.appendChild(confetti);
+  }
+
+  setTimeout(() => {
+    if (confettiContainer) {
+      confettiContainer.remove();
+    }
+  }, 3000);
+}
+
+function randomColor() {
+  const colors = ['#FFC107', '#FF5722', '#4CAF50', '#2196F3', '#9C27B0'];
+  return colors[Math.floor(Math.random() * colors.length)];
+}
+
+function animateBestStreakUpdate() {
+  const bestStreakElement = document.getElementById('best-streak-number');
+  bestStreakElement.textContent = bestStreak;
+
+  const bestStreakDisplay = document.getElementById('best-streak-display');
+
+  bestStreakDisplay.classList.remove('best-streak-animate');
+
+  void bestStreakDisplay.offsetWidth;
+  bestStreakDisplay.classList.add('best-streak-animate');
+
+  showConfetti();
+}
+
+function updateMotivationIllustration() {
+  const illustration = document.getElementById('motivation-illustration');
+  if (habitStreak === 0) {
+    illustration.style.display = 'block';
+  } else {
+    illustration.style.display = 'none';
+  }
+}
+
 function toggleHabitCompletion(e) {
   const index = e.target.dataset.index;
   habits[index].completed = e.target.checked;
@@ -134,23 +202,23 @@ function toggleHabitCompletion(e) {
 }
 
 function toggleAboutSection(li, habit) {
-  // Look for an existing about section inside the li's wrapper.
+
   const wrapper = li.querySelector('.habit-item-wrapper');
   let aboutDiv = wrapper.querySelector('.habit-about');
   if (aboutDiv) {
-    // Remove it if it's there.
+
     aboutDiv.remove();
   } else {
-    // Create the about div as a block-level element.
+
     aboutDiv = document.createElement('div');
     aboutDiv.classList.add('habit-about');
+    aboutDiv.classList.add(`${habit.type}-about`);
     aboutDiv.textContent = habit.about ? habit.about : "No additional info provided.";
-    // Append it so it's part of the document flow.
+
     wrapper.appendChild(aboutDiv);
   }
 }
 
-// Save to local storage
 function updateLocalStorage() {
   localStorage.setItem('habits', JSON.stringify(habits));
   localStorage.setItem('habitStreak', JSON.stringify(habitStreak));
@@ -158,17 +226,16 @@ function updateLocalStorage() {
   localStorage.setItem('resetDate', lastResetDate);
   localStorage.setItem('bestStreak', bestStreak);
 }
-// Function to calculate the difference in days between two dates
+
 function getDifferenceInDays(date1, date2) {
-  const oneDay = 24 * 60 * 60 * 1000; // Milliseconds in one day
+  const oneDay = 24 * 60 * 60 * 1000; 
   const firstDate = new Date(date1);
   const secondDate = new Date(date2);
   return Math.round(Math.abs((firstDate - secondDate) / oneDay));
 }
-// Daily reset check
+
 function checkDailyReset() {
   const today = new Date().toDateString();
-
   if (today !== lastResetDate) {
     const allCompleted = habits.length > 0 && habits.every(habit => habit.completed);
     console.log(getDifferenceInDays(today, lastResetDate));
@@ -176,32 +243,36 @@ function checkDailyReset() {
       if (!startDate) {
         const yesterday = new Date();
         yesterday.setDate(yesterday.getDate() - 1);
-        startDate = yesterday.toDateString(); // Set start date to one day before today
+        startDate = yesterday.toDateString(); 
       }
-      if (habitStreak > bestStreak) bestStreak = habitStreak;// Update best streak
       habitStreak++;
+      if (habitStreak > bestStreak){
+        bestStreak = habitStreak;
+        animateBestStreakUpdate();
+      }
+
+      animateStreakUpdate();
     } else {
       habitStreak = 0;
       startDate = '';
+      animateStreakUpdate(); 
     }
-
     habits = habits.map(habit => ({ ...habit, completed: false }));
     lastResetDate = today;
 
     updateLocalStorage();
     renderHabits();
+    updateMotivationIllustration();
   }
 }
 
-// Close the modal and remove blur
 function closeModal() {
   habitModal.style.display = 'none';
   bodyWrapper.classList.remove('modal-active');
 }
 
-// Show or hide the no habits illustration
 function toggleNoHabitsIllustration() {
-  noHabitsIllustration.style.display = habitList.children.length === 0 ? 'block' : 'none';
+  noHabitsIllustration.style.display = habits.length === 0 ? 'block' : 'none';
 }
 
 function deleteHabit(index) {
@@ -216,7 +287,7 @@ function deleteHabit(index) {
 }
 
 document.getElementById('edit').addEventListener('click', toggleEditMode);
-// Request notification permission
+
 function requestNotificationPermission() {
   if ("Notification" in window) {
     Notification.requestPermission().then(permission => {
@@ -229,44 +300,38 @@ function requestNotificationPermission() {
   }
 }
 
-// Register Service Worker
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("sw.js")
-    .then(swReg => console.log("Service Worker Registered:", swReg))
-    .catch(err => console.error("Service Worker Error:", err));
-}
-const testDelay = 5000; // 5 seconds
-// Schedule notification for end of the day
+const testDelay = 5000; 
+
 function scheduleEndOfDayNotification() {
   const now = new Date();
   const midnight = new Date();
-  midnight.setHours(23, 0, 0, 0); // 11:00 PM
+  midnight.setHours(23, 0, 0, 0); 
 
   const timeUntilNotification = midnight - now;
 
   if (timeUntilNotification > 0) {
-    setTimeout(() => {
-      navigator.serviceWorker.ready.then(swReg => {
-        swReg.showNotification("Reminder", {
-          body: "The day is ending soon! Complete your habits.",
-          icon: "content/icon.png",
-        });
-      });
-    }, testDelay);
+    setTimeout(showInPageNotification, testDelay);
+  }
+}
+function showInPageNotification() {
+  if ("Notification" in window && Notification.permission === "granted") {
+    new Notification("Reminder", {
+      body: "The day is ending soon! Complete your habits.",
+      icon: "/content/streak.png"  
+    });
+
   }
 }
 
-// Show notification when a streak is maintained
 function showCompletionNotification() {
   if ("Notification" in window && Notification.permission === "granted") {
     new Notification("Great Job!", {
       body: "You've completed your habits for today!",
-      icon: "icon.png",
+      icon: "streak.png",
     });
   }
 }
 
-// Call functions on app load
 initializeApp();
 requestNotificationPermission();
 scheduleEndOfDayNotification();
